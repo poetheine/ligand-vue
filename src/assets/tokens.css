@@ -1,0 +1,57 @@
+:root {
+  /* ── Spacing ────────────────────────────────────────────── */
+  --ligand-spacing-xs:  4px;
+  --ligand-spacing-sm:  8px;
+  --ligand-spacing-md:  16px;
+  --ligand-spacing-lg:  24px;
+  --ligand-spacing-xl:  32px;
+
+  /* ── Color ──────────────────────────────────────────────── */
+  --ligand-color-primary:      #1a6ef5;
+  --ligand-color-primary-hover:#1558cc;
+  --ligand-color-surface:      #ffffff;
+  --ligand-color-background:   #f5f5f5;
+  --ligand-color-border:       #e0e0e0;
+  --ligand-color-text:         #1a1a1a;
+  --ligand-color-text-muted:   #6b6b6b;
+  --ligand-color-error:        #e53935;
+
+  /* ── Typography ─────────────────────────────────────────── */
+  --ligand-font-size-sm:   13px;
+  --ligand-font-size-md:   15px;
+  --ligand-font-size-lg:   18px;
+  --ligand-font-weight-normal: 400;
+  --ligand-font-weight-bold:   600;
+
+  /* ── Border ─────────────────────────────────────────────── */
+  --ligand-border-radius-sm: 4px;
+  --ligand-border-radius-md: 6px;
+  --ligand-border-radius-lg: 8px;
+
+  /* ── Form ───────────────────────────────────────────────── */
+  --ligand-field-padding-x:  12px;
+  --ligand-field-padding-y:  8px;
+  --ligand-field-height:     36px;
+}
+
+/* ── Base form element styles (for native adapter) ─────────── */
+.ligand-input,
+.ligand-select,
+.ligand-textarea {
+  font: inherit;
+  width: 100%;
+  padding: var(--ligand-field-padding-y) var(--ligand-field-padding-x);
+  border: 1px solid var(--ligand-color-border);
+  border-radius: var(--ligand-border-radius-md);
+  background: var(--ligand-color-surface);
+  color: var(--ligand-color-text);
+  font-size: var(--ligand-font-size-md);
+  box-sizing: border-box;
+}
+
+.ligand-input:focus,
+.ligand-select:focus,
+.ligand-textarea:focus {
+  outline: 2px solid var(--ligand-color-primary);
+  outline-offset: 1px;
+}

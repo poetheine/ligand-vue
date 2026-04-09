@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ligand — Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Syne:wght@400;600;700;800&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: rgba(255,255,255,0.07);
+    --accent: #5b8dff;
+    --accent2: #a78bfa;
+    --accent3: #34d399;
+    --text: #e8e8f0;
+    --muted: #5a5a72;
+    --schema-color: #5b8dff;
+    --renderer-color: #a78bfa;
+    --data-color: #34d399;
+    --mock-color: #fb923c;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+  }
+
+  .canvas {
+    width: 900px;
+    position: relative;
+  }
+
+  /* ── Header ── */
+  .header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 56px;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 32px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
+  .logo span { color: var(--accent); }
+  .tagline {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* ── Main diagram ── */
+  .diagram {
+    display: grid;
+    grid-template-columns: 1fr 48px 1fr 48px 1fr;
+    grid-template-rows: auto 40px auto 40px auto;
+    gap: 0;
+    align-items: center;
+  }
+
+  /* ── Blocks ── */
+  .block {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    background: var(--surface);
+    position: relative;
+    transition: border-color 0.2s;
+  }
+  .block:hover { border-color: rgba(255,255,255,0.15); }
+
+  .block-label {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .block-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 6px;
+  }
+  .block-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    position: absolute;
+    top: 20px; right: 20px;
+  }
+
+  /* Schema column */
+  .col-schema { grid-column: 1; }
+  .schema-main { grid-row: 1; border-color: rgba(91,141,255,0.3); }
+  .schema-main .dot { background: var(--schema-color); box-shadow: 0 0 8px var(--schema-color); }
+  .schema-main .block-title { color: var(--schema-color); }
+
+  .schema-sub {
+    margin-top: 12px;
+    padding: 14px 18px;
+    border-radius: 8px;
+    border: 1px solid rgba(91,141,255,0.15);
+    background: rgba(91,141,255,0.04);
+  }
+  .schema-sub-title {
+    font-size: 11px;
+    color: var(--schema-color);
+    opacity: 0.8;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  .schema-sub-desc { font-size: 10px; color: var(--muted); }
+
+  /* Arrow column */
+  .arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .arrow-line {
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--muted), transparent);
+    flex: 1;
+  }
+  .arrow-h {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--muted), transparent);
+    position: relative;
+  }
+  .arrow-h::after {
+    content: '▶';
+    position: absolute;
+    right: -4px;
+    top: -6px;
+    font-size: 8px;
+    color: var(--muted);
+  }
+
+  /* Renderer column */
+  .col-renderer { grid-column: 3; }
+  .renderer-main { border-color: rgba(167,139,250,0.3); }
+  .renderer-main .dot { background: var(--renderer-color); box-shadow: 0 0 8px var(--renderer-color); }
+  .renderer-main .block-title { color: var(--renderer-color); }
+
+  .mode-badges {
+    display: flex;
+    gap: 6px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .badge {
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid;
+  }
+  .badge-view  { color: var(--accent3); border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.06); }
+  .badge-edit  { color: var(--accent);  border-color: rgba(91,141,255,0.3); background: rgba(91,141,255,0.06); }
+  .badge-save  { color: var(--accent2); border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.06); }
+
+  /* Data column */
+  .col-data { grid-column: 5; }
+  .data-db {
+    border-color: rgba(52,211,153,0.3);
+    margin-bottom: 12px;
+  }
+  .data-db .dot { background: var(--data-color); box-shadow: 0 0 8px var(--data-color); }
+  .data-db .block-title { color: var(--data-color); }
+
+  .data-mock {
+    border-color: rgba(251,146,60,0.3);
+  }
+  .data-mock .dot { background: var(--mock-color); box-shadow: 0 0 8px var(--mock-color); }
+  .data-mock .block-title { color: var(--mock-color); }
+
+  .swap-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+    font-size: 9px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+  .swap-hint::before {
+    content: '';
+    display: block;
+    width: 20px; height: 1px;
+    background: var(--muted);
+  }
+
+  /* ── Bottom: Node hierarchy ── */
+  .hierarchy {
+    margin-top: 48px;
+    padding: 24px 28px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+  .hierarchy-label {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .node-chain {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+  .node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .node-box {
+    padding: 8px 20px;
+    border-radius: 6px;
+    border: 1px solid;
+    font-size: 12px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .node-sub { font-size: 9px; color: var(--muted); }
+
+  .n-card   { color: var(--schema-color); border-color: rgba(91,141,255,0.3); background: rgba(91,141,255,0.06); }
+  .n-section{ color: var(--accent2); border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.06); }
+  .n-block  { color: var(--accent3); border-color: rgba(52,211,153,0.3); background: rgba(52,211,153,0.06); }
+  .n-field  { color: var(--mock-color); border-color: rgba(251,146,60,0.3); background: rgba(251,146,60,0.06); }
+
+  .chain-arrow {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), var(--border));
+    position: relative;
+    margin: 0 4px;
+    margin-bottom: 14px;
+  }
+  .chain-arrow::after {
+    content: '→';
+    position: absolute;
+    right: -6px;
+    top: -8px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  /* ── Principle ── */
+  .principle {
+    margin-top: 24px;
+    padding: 16px 20px;
+    border-left: 2px solid var(--accent);
+    background: rgba(91,141,255,0.04);
+    border-radius: 0 8px 8px 0;
+  }
+  .principle-text {
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.7;
+  }
+  .principle-text strong { color: var(--text); font-style: normal; }
+
+  /* ── Footer ── */
+  .footer {
+    margin-top: 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .footer-left { font-size: 10px; color: var(--muted); }
+  .footer-right { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; }
+
+  /* ── Connector SVG ── */
+  .connector-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+  }
+</style>
+</head>
+<body>
+<div class="canvas">
+
+  <div class="header">
+    <div class="logo">ligand<span>-vue</span></div>
+    <div class="tagline">Schema-Driven UI · Adapter Architecture</div>
+  </div>
+
+  <!-- Main 3-column diagram -->
+  <div style="display: grid; grid-template-columns: 1fr 64px 1fr 64px 1fr; align-items: start; gap: 0;">
+
+    <!-- Col 1: Schema -->
+    <div class="block schema-main">
+      <div class="dot"></div>
+      <div class="block-label">Layer 01</div>
+      <div class="block-title">Schema</div>
+      <div class="block-desc">Declares static structure: UI shape, field types, and layout hierarchy.</div>
+      <div class="schema-sub" style="margin-top:14px;">
+        <div class="schema-sub-title">PageSchema</div>
+        <div class="schema-sub-desc">tabs · actions · cards[ ]</div>
+      </div>
+      <div class="schema-sub" style="margin-top:8px;">
+        <div class="schema-sub-title">CardNode → SectionNode</div>
+        <div class="schema-sub-desc">BlockNode → FieldSchema</div>
+      </div>
+      <div class="schema-sub" style="margin-top:8px;">
+        <div class="schema-sub-title">FieldSchema</div>
+        <div class="schema-sub-desc">type · key · label · options …</div>
+      </div>
+    </div>
+
+    <!-- Arrow 1 -->
+    <div style="display:flex; align-items:center; justify-content:center; height:100%;">
+      <div style="width:100%; position:relative;">
+        <div style="height:1px; background: linear-gradient(to right, rgba(91,141,255,0.4), rgba(167,139,250,0.4));"></div>
+        <div style="position:absolute; right:-5px; top:-7px; font-size:11px; color: var(--accent2);">▶</div>
+        <div style="position:absolute; top:6px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--muted); letter-spacing:0.1em; white-space:nowrap;">drives</div>
+      </div>
+    </div>
+
+    <!-- Col 2: Renderer -->
+    <div class="block renderer-main">
+      <div class="dot"></div>
+      <div class="block-label">Layer 02</div>
+      <div class="block-title">LigandRenderer</div>
+      <div class="block-desc">Routes node types and delegates rendering to concrete UI components via adapters.</div>
+
+      <div style="margin-top:14px; padding:12px 14px; border-radius:6px; background:rgba(167,139,250,0.05); border:1px solid rgba(167,139,250,0.15);">
+        <div style="font-size:10px; color:var(--accent2); margin-bottom:6px;">LigandResolver</div>
+        <div style="font-size:10px; color:var(--muted);">field.type → adapter cell</div>
+      </div>
+
+      <div class="mode-badges">
+        <div class="badge badge-view">view</div>
+        <div class="badge badge-edit">edit</div>
+        <div class="badge badge-save">save / cancel</div>
+      </div>
+
+      <div style="margin-top:12px; font-size:10px; color:var(--muted);">
+        <span style="color:var(--accent2);">useLigandMode</span> — field &gt; layout &gt; default
+      </div>
+    </div>
+
+    <!-- Arrow 2 -->
+    <div style="display:flex; align-items:center; justify-content:center; height:100%;">
+      <div style="width:100%; position:relative;">
+        <div style="height:1px; background: linear-gradient(to right, rgba(167,139,250,0.4), rgba(52,211,153,0.4));"></div>
+        <div style="position:absolute; right:-5px; top:-7px; font-size:11px; color: var(--accent3);">▶</div>
+        <div style="position:absolute; top:6px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--muted); letter-spacing:0.1em; white-space:nowrap;">fetches</div>
+      </div>
+    </div>
+
+    <!-- Col 3: Data -->
+    <div>
+      <div class="block data-db" style="margin-bottom:12px;">
+        <div class="dot"></div>
+        <div class="block-label">Data Source A</div>
+        <div class="block-title">DB / API</div>
+        <div class="block-desc">Real backend source. Replace with live calls (for example via axios).</div>
+      </div>
+
+      <div style="display:flex; align-items:center; gap:8px; margin: 8px 0; padding: 0 8px;">
+        <div style="flex:1; height:1px; background:var(--border);"></div>
+        <div style="font-size:9px; color:var(--muted); letter-spacing:0.1em;">swap</div>
+        <div style="flex:1; height:1px; background:var(--border);"></div>
+      </div>
+
+      <div class="block data-mock">
+        <div class="dot"></div>
+        <div class="block-label">Data Source B</div>
+        <div class="block-title">mock</div>
+        <div class="block-desc">Development-stage substitute. Switch sources by replacing only `fetchMap`.</div>
+        <div style="margin-top:10px; font-size:9px; color:var(--mock-color); opacity:0.8; font-style:italic;">
+          useMockApi · fetchMap[key]
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Node Hierarchy -->
+  <div class="hierarchy">
+    <div class="hierarchy-label">Node Hierarchy</div>
+    <div class="node-chain">
+      <div class="node">
+        <div class="node-box n-card">Card</div>
+        <div class="node-sub">LigandCard</div>
+      </div>
+      <div class="chain-arrow"></div>
+      <div class="node">
+        <div class="node-box n-section">Section</div>
+        <div class="node-sub">LigandSection</div>
+      </div>
+      <div class="chain-arrow"></div>
+      <div class="node">
+        <div class="node-box n-block">Block</div>
+        <div class="node-sub">LigandBlock</div>
+      </div>
+      <div class="chain-arrow"></div>
+      <div class="node">
+        <div class="node-box n-field">Field</div>
+        <div class="node-sub">LigandResolver → cell</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Principle -->
+  <div class="principle" style="margin-top:20px;">
+    <div class="principle-text">
+      <strong>"UI is where data flows through."</strong> &nbsp;—&nbsp;
+      Schema declares structure, Renderer delegates through adapters, and data flows from swappable sources.
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-left">github.com/poetheine/ligand-vue</div>
+    <div class="footer-right">Vue 3 · TypeScript · Adapter Pattern</div>
+  </div>
+
+</div>
+</body>
+</html>
