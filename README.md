@@ -18,7 +18,7 @@ Ligand-vue is built on a single idea: UI is not a destination, it is a passthrou
 - 🔄 **Two-way binding** — data flows down, events bubble up, single source of truth
 - 🔌 **Adapter pattern** — swap between native HTML, PrimeVue, or Naive UI with a one-line change
 - 🧩 **Composable architecture** — layout, resolution, and adaptation are fully separated concerns
-- 🎨 **Design token system** — centralized `--lig-*` CSS variables, Shadow DOM compatible
+- 🎨 **Design token system** — centralized `--ligand-*` CSS variables, Shadow DOM compatible
 
 ---
 
@@ -110,7 +110,7 @@ card → section → block → field
 
 ## Design Tokens
 
-All visual variables follow the `--lig-*` prefix and are declared in `assets/tokens.css`. They penetrate Shadow DOM boundaries, keeping the library compatible with the Web Components roadmap.
+All visual variables follow the `--ligand-*` prefix and are declared in `assets/tokens.css`. They penetrate Shadow DOM boundaries, keeping the library compatible with the Web Components roadmap.
 
 ---
 
