@@ -88,7 +88,7 @@ Schema, layout, and rendering logic remain untouched.
 
 ## Architecture
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for full diagrams covering:
+See [Architecture.md](./Architecture.md) for full diagrams covering:
 
 - Overall component hierarchy
 - Top-down data flow
